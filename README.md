@@ -16,6 +16,7 @@ An end-to-end aerospace telemetry, communication, and ground control system desi
 
 The system is divided into three core layers:
 
+```text
 +---------------------------------------------------------------+
 |                    Browser (Frontend)                         |
 | index.html + style.css + app.js                               |
@@ -36,7 +37,7 @@ The system is divided into three core layers:
 |                     all_sensors.ino                           |
 |  Sensors -> JSON -> XBee -> Ground Station -> Commands Back   |
 +---------------------------------------------------------------+
-
+```
 ---
 
 ##  Core Components
