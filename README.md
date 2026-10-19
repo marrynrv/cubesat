@@ -1,4 +1,4 @@
-#  ASTRA — CubeSat Avionics & Ground Station Architecture
+#  CubeSat Avionics & Ground Station Architecture
 
 An end-to-end aerospace telemetry, communication, and ground control system designed for a CubeSat prototype. The project bridges low-level embedded firmware, wireless RF transmission, a Python multi-threaded backend, and a real-time web dashboard.
 
