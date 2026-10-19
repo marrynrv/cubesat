@@ -1,0 +1,367 @@
+* {
+
+    box-sizing: border-box;
+
+}
+
+
+body {
+
+    margin: 0;
+
+    padding: 20px;
+
+    background: #08090b;
+
+    color: #e8e8e8;
+
+    font-family:
+
+        "Courier New",
+
+        monospace;
+
+}
+
+
+.top-bar {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 15px 20px;
+
+    border-top: 1px solid #777;
+
+    border-bottom: 1px solid #777;
+
+    margin-bottom: 20px;
+
+    font-size: 14px;
+
+}
+
+
+.logo {
+
+    font-weight: bold;
+
+}
+
+
+.logo span {
+
+    margin-left: 15px;
+
+}
+
+
+.status {
+
+    font-weight: bold;
+
+}
+
+
+.status.connected {
+
+    color: #00ff88;
+
+}
+
+
+.status.disconnected {
+
+    color: #ff4444;
+
+}
+
+
+.alarm-panel,
+
+.panel,
+
+.sensor-panel,
+
+.video-panel {
+
+    border: 1px solid #777;
+
+    padding: 20px;
+
+    margin-bottom: 20px;
+
+    background: #0c0d0f;
+
+}
+
+
+h2 {
+
+    font-size: 16px;
+
+    margin-top: 0;
+
+    margin-bottom: 20px;
+
+    letter-spacing: 1px;
+
+}
+
+
+h2 span {
+
+    color: #aaa;
+
+    font-size: 13px;
+
+}
+
+
+.system-status {
+
+    font-size: 20px;
+
+    margin-bottom: 20px;
+
+}
+
+
+.system-status.error {
+
+    color: #ff3333;
+
+}
+
+
+.errors-grid {
+
+    display: grid;
+
+    grid-template-columns:
+
+        repeat(3, 1fr);
+
+    gap: 12px;
+
+}
+
+
+.error-item {
+
+    padding: 8px;
+
+}
+
+
+.error-item.ok {
+
+    color: #00ff88;
+
+}
+
+
+.error-item.error {
+
+    color: #ff3333;
+
+}
+
+
+.main-grid {
+
+    display: grid;
+
+    grid-template-columns:
+
+        1fr 1.4fr;
+
+    gap: 20px;
+
+}
+
+
+.telemetry-row {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    padding: 12px 0;
+
+    border-bottom: 1px solid #222;
+
+}
+
+
+.telemetry-row strong {
+
+    color: white;
+
+}
+
+
+.graph-panel {
+
+    min-height: 350px;
+
+}
+
+
+#telemetryChart {
+
+    width: 100% !important;
+
+    height: 280px !important;
+
+}
+
+
+#cube-container {
+
+    width: 100%;
+
+    height: 280px;
+
+}
+
+
+.angles {
+
+    display: flex;
+
+    justify-content: space-around;
+
+    margin-top: 10px;
+
+    font-size: 14px;
+
+}
+
+
+.angles strong {
+
+    color: #00ff88;
+
+}
+
+
+.compass {
+
+    text-align: center;
+
+    margin-top: 20px;
+
+    font-size: 18px;
+
+}
+
+#map {
+    width: 100%;
+    height: 400px; /* Or any other height that fits thedesign. */
+    background-color: #1a1a1a; /*  Temporary background in order to see block. */
+}
+
+
+.gps-data {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+    font-size: 13px;
+
+}
+
+
+.sensor-grid {
+
+    display: grid;
+
+    grid-template-columns:
+
+        1fr 1fr;
+
+    gap: 40px;
+
+}
+
+
+.sensor-grid h3 {
+
+    color: #aaa;
+
+}
+
+
+.sensor-grid p {
+
+    margin: 8px 0;
+
+}
+
+
+.video-placeholder {
+
+    height: 300px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: 1px dashed #555;
+
+    color: #888;
+
+}
+
+
+@media (max-width: 900px) {
+
+
+    .top-bar {
+
+        flex-direction: column;
+
+        gap: 10px;
+
+        align-items: flex-start;
+
+    }
+
+
+    .main-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .errors-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .gps-data {
+
+        flex-direction: column;
+
+    }
+
+
+    .sensor-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+}

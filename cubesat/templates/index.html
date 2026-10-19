@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASTRA 2026</title>
+
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header class="top-bar">
+        <div>
+            <span>TEAM-ASTRA-2026</span>
+        </div>
+
+        <div>
+            CONNECTION STATUS:
+            <span id="connectionStatus" class="status disconnected">DISCONNECTED</span>
+            <span id="portValue">(---)</span>
+        </div>
+
+        <div>
+            MISSION TIME:
+            <span id="missionTime">00:00:00</span>
+        </div>
+    </header>
+
+    <!-- ISS SYSTEM ALARM -->
+    <section class="alarm-panel">
+        <h2>ISS BLOCK <span>(SYSTEM ALARM INTERFACE)</span></h2>
+
+        <div id="systemStatus" class="system-status">
+            STATUS: [ SYSTEM NOMINAL ]
+        </div>
+
+        <div class="errors-grid">
+            <div id="err01" class="error-item ok">[ OK ] ERR_01: Descent Rate</div>
+            <div id="err02" class="error-item ok">[ OK ] ERR_02: GPS Data</div>
+            <!-- <div id="err03" class="error-item ok">[ OK ] ERR_03: Separation Confirmed</div> -->
+            <div id="err03" class="error-item ok">[ OK ] ERR_03: IoT Data Transmission</div>
+        </div>
+    </section>
+
+    <!-- TOP SECTION: DASHBOARD (TELEMETRY + VIDEO + CHARTS) -->
+    <div style="display: grid; grid-template-columns: 280px 1.2fr 1.2fr; gap: 15px; margin: 15px 15px 0 15px;">
+
+        <!-- 1. TELEMETRY PANEL & COMMAND ISSUER -->
+        <section class="panel telemetry-panel" style="margin: 0; display: flex; flex-direction: column; justify-content: space-between;">
+            <h2>TELEMETRY <span>(1 Hz)</span></h2>
+
+            <div class="telemetry-row">
+                <span>Altitude</span>
+                <strong id="altitude">0.0 m</strong>
+            </div>
+
+            <div class="telemetry-row">
+                <span>Descent Rate</span>
+                <strong id="descentRate">0.0 m/s</strong>
+            </div>
+
+            <div class="telemetry-row">
+                <span>Pressure</span>
+                <strong id="pressure">0.0 hPa</strong>
+            </div>
+
+            <div class="telemetry-row">
+                <span>Temperature</span>
+                <strong id="temperature">0.0 °C</strong>
+            </div>
+
+            <div class="telemetry-row">
+                <span>GPS Altitude</span>
+                <strong id="gpsAltitude">0.0 m</strong>
+            </div>
+
+            <div class="telemetry-row">
+                <span>Battery Charge</span>
+                <strong id="battery">0.00 V</strong>
+            </div>
+
+            <!-- CubeSat SD cardmessage transmission block. -->
+            <div style="margin-top: 15px; background: rgba(255,255,255,0.03); padding: 10px; border: 1px solid #333; border-radius: 4px;">
+                <h3 style="color: #007bff; font-size: 11px; margin: 0 0 8px 0; letter-spacing: 1px;">SEND MSG TO CUBESAT SD</h3>
+                <div style="display: flex; gap: 5px;">
+                    <input type="text" id="satMessageInput" placeholder="Enter message..." style="flex: 1; background: #111; color: #fff; border: 1px solid #444; padding: 6px; font-size: 11px; outline: none; border-radius: 2px;">
+                    <button id="txBtn" style="background: #007bff; color: #fff; border: none; padding: 6px 12px; font-size: 11px; font-weight: bold; cursor: pointer; border-radius: 2px;">TX</button>
+                </div>
+                <div id="satMessageStatus" style="font-size: 10px; margin-top: 5px; color: #888; font-family: monospace;">STATUS: READY</div>
+            </div>
+        </section>
+
+        <!-- 2. VIDEO STREAM PANEL -->
+        <section class="panel" style="margin: 0; display: flex; flex-direction: column;">
+            <h2>LIVE FPV VIDEO STREAM</h2>
+            
+            <div style="flex: 1; background: #000; border: 1px solid #222; display: flex; align-items: center; justify-content: center; min-height: 220px; position: relative;">
+                <img id="video-stream" src="/video_feed" style="width: 100%; height: 100%; object-fit: contain;" alt="Waiting for stream...">
+            </div>
+
+            <div style="margin-top: 10px; background: rgba(255,255,255,0.02); padding: 6px 10px; border: 1px solid #222;">
+                <label style="display: block; margin-bottom: 2px; font-weight: bold; color: #888; font-size: 10px; letter-spacing: 1px;">CAMERA SOURCE</label>
+                <select id="camera-select" style="background: #111; color: #fff; padding: 6px; border: 1px solid #333; width: 100%; font-family: monospace; font-size: 12px; outline: none; cursor: pointer;">
+                    <option value="0">Camera 0 (USB PC Camera / Skydroid)</option>
+                    <option value="1">Camera 1 (External Camera)</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- 3. TWO CHARTS PANEL -->
+        <section class="panel" style="margin: 0; display: flex; flex-direction: column; gap: 10px;">
+            <div style="flex: 1; display: flex; flex-direction: column;">
+                <h2 style="font-size: 11px; margin-bottom: 5px; color: #888;">ALTITUDE & DESCENT RATE</h2>
+                <div style="flex: 1; position: relative; min-height: 110px;">
+                    <canvas id="telemetryChart"></canvas>
+                </div>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #222; margin: 0;">
+
+            <div style="flex: 1; display: flex; flex-direction: column;">
+                <h2 style="font-size: 11px; margin-bottom: 5px; color: #888;">PRESSURE & TEMPERATURE (1 Hz)</h2>
+                <div style="flex: 1; position: relative; min-height: 110px;">
+                    <canvas id="envChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- LOWER SECTION: 3-COLUMN GRID (ORIENTATION + MAP + MPU SENSORS) -->
+    <div style="display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 15px; margin: 15px;">
+
+        <!-- 1. ORIENTATION 3D -->
+        <section class="panel orientation-panel" style="margin: 0; display: flex; flex-direction: column; height: 320px;">
+            <h2>ORIENTATION</h2>
+            <div id="cube-container" style="flex: 1; width: 100%; min-height: 200px;"></div>
+            <div class="angles" style="margin-top: 5px;">
+                <div>PITCH: <strong id="pitch">0.0°</strong></div>
+                <div>ROLL: <strong id="roll">0.0°</strong></div>
+                <div>YAW: <strong id="yaw">0.0°</strong></div>
+            </div>
+        </section>
+
+        <!-- 2. MAP AND GPS -->
+        <section class="panel map-panel" style="margin: 0; display: flex; flex-direction: column; height: 320px;">
+            <h2>MAP AND GPS COORDINATES</h2>
+            <div class="gps-data" style="margin-bottom: 8px;">
+                <div>Lat: <strong id="latitude">0.000000</strong></div>
+                <div>Lng: <strong id="longitude">0.000000</strong></div>
+                <div>Alt: <strong id="mapAltitude">0.0 m</strong></div>
+            </div>
+            <div id="map" style="flex: 1; width: 100%; border: 1px solid #222; border-radius: 4px;"></div>
+        </section>
+
+        <!-- 3. MPU6050 SENSOR DATA -->
+        <section class="panel" style="margin: 0; display: flex; flex-direction: column; justify-content: space-between; height: 320px;">
+            <h2>MPU6050 SENSOR DATA</h2>
+
+            <div style="background: rgba(255,255,255,0.02); padding: 12px; border: 1px solid #222;">
+                <h3 style="color: #007bff; font-size: 11px; margin-bottom: 8px; letter-spacing: 1px;">ACCELERATION (m/s²)</h3>
+                <p style="font-family: monospace; font-size: 13px; margin: 4px 0;">X: <span id="accX" style="color: #fff; font-weight: bold;">0.00</span></p>
+                <p style="font-family: monospace; font-size: 13px; margin: 4px 0;">Y: <span id="accY" style="color: #fff; font-weight: bold;">0.00</span></p>
+                <p style="font-family: monospace; font-size: 13px; margin: 4px 0;">Z: <span id="accZ" style="color: #fff; font-weight: bold;">9.81</span></p>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.02); padding: 12px; border: 1px solid #222;">
+                <h3 style="color: #ffc107; font-size: 11px; margin-bottom: 8px; letter-spacing: 1px;">GYROSCOPE (°/s)</h3>
+                <p style="font-family: monospace; font-size: 13px; margin: 4px 0;">X: <span id="gyroX" style="color: #fff; font-weight: bold;">0.000</span></p>
+                <p style="font-family: monospace; font-size: 13px; margin: 4px 0;">Y: <span id="gyroY" style="color: #fff; font-weight: bold;">0.000</span></p>
+                <p style="font-family: monospace; font-size: 13px; margin: 4px 0;">Z: <span id="gyroZ" style="color: #fff; font-weight: bold;">0.000</span></p>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- JS -->
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
